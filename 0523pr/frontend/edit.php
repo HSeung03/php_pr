@@ -21,17 +21,20 @@ $row = $result->fetch_assoc();
 ?>
 
 <h3>게시글 수정</h3>
-<form action="update_process.php" method="post">
+<form action="../backend/update_process.php" method="post">
   <input type="hidden" name="id" value="<?= $row['id'] ?>">
-  이름: <input type="text" name="name" value="<?= $row['name'] ?>"><br><br>
-  제목: <input type="text" name="subject" value="<?= $row['subject'] ?>"><br><br>
+  이름: <input type="text" name="name" value="<?= htmlspecialchars($row['name']) ?>"><br><br>
+  제목: <input type="text" name="subject" value="<?= htmlspecialchars($row['subject']) ?>"><br><br>
   내용:<br>
-  <textarea name="content"><?= $row['content'] ?></textarea><br><br>
+  <textarea name="content" rows="10" cols="50"><?= htmlspecialchars($row['content']) ?></textarea><br><br>
   <button type="submit">수정</button>
 </form>
 
 <h3>게시글 삭제</h3>
-<form action="delete_process.php" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+<form action="../backend/delete_process.php" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');">
   <input type="hidden" name="id" value="<?= $row['id'] ?>">
   <button type="submit" style="color: red;">삭제</button>
 </form>
+
+<br>
+<a href="list.php">목록으로</a>

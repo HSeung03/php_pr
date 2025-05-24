@@ -34,7 +34,7 @@ $row = $result->fetch_assoc();
 </form>
 
 <!-- 삭제 버튼 -->
-<form action="delete_process.php" method="post" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+<form action="../backend/delete_process.php" method="post" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
     <input type="hidden" name="id" value="<?= $row['id'] ?>">
     <button type="submit">삭제</button>
 </form>

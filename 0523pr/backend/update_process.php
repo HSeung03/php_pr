@@ -10,7 +10,8 @@ $stmt = $conn->prepare("UPDATE board SET name=?, subject=?, content=? WHERE id=?
 $stmt->bind_param("sssi", $name, $subject, $content, $id);
 
 if ($stmt->execute()) {
-    echo "<script>alert('수정 완료'); location.href='list.php';</script>";
+    echo "<script>alert('수정 완료'); location.href='../frontend/view.php?id=$id';</script>";
+
 } else {
     echo "<script>alert('수정 실패'); history.back();</script>";
 }

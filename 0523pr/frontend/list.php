@@ -1,6 +1,17 @@
 <?php
 $conn = new mysqli("mysql", "root", "12345678", "board_db");
-$sql = "SELECT * FROM board ORDER BY id DESC";
+
+// 검색 기능 처리 (옵션)
+$search_type = $_GET['search_type'] ?? '';
+$search_query = $_GET['search_query'] ?? '';
+
+$sql = "SELECT * FROM board";
+
+if ($search_type && $search_query) {
+    $sql .= " WHERE $search_type LIKE '%$search_query%'";
+}
+
+$sql .= " ORDER BY id DESC";
 $result = $conn->query($sql);
 ?>
 
@@ -9,16 +20,15 @@ $result = $conn->query($sql);
 <!-- 검색 폼 -->
 <form action="list.php" method="get">
     <select name="search_type">
-        <option value="subject">제목</option>
-        <option value="content">내용</option>
+        <option value="subject" <?= $search_type == "subject" ? "selected" : "" ?>>제목</option>
+        <option value="content" <?= $search_type == "content" ? "selected" : "" ?>>내용</option>
     </select>
-    <input type="search" name="search_query" placeholder="검색어 입력">
+    <input type="search" name="search_query" value="<?= htmlspecialchars($search_query) ?>" placeholder="검색어 입력">
     <button type="submit">검색</button>
 </form>
 
 <br>
 
-<!-- 게시글 목록 테이블 -->
 <table border="1">
     <tr>
         <th>번호</th>
@@ -45,5 +55,5 @@ $result = $conn->query($sql);
 
 <br>
 
-<!-- 글쓰기 버튼 (무조건 출력) -->
-<a href="write.php"><button type="button">글쓰기</button></a>
+<!-- 글쓰기 버튼 -->
+<a href="write.php">글쓰기</a>
