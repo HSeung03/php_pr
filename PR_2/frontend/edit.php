@@ -1,9 +1,29 @@
 <?php
+// DB 연결
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
-$id = $_POST['id'];
+if ($conn->connect_error) {
+    die("DB 연결 실패: " . $conn->connect_error);
+}
+$conn->set_charset("utf8mb4");
 
-$row = $conn->query("SELECT * FROM board WHERE id = $id")->fetch_assoc();
+// id 가져오기
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+if ($id === 0) {
+    die("잘못된 접근입니다.");
+}
+
+// 게시글 가져오기
+$sql = "SELECT * FROM board WHERE id = $id";
+$result = $conn->query($sql);
+
+if (!$result || $result->num_rows === 0) {
+    die("게시글을 찾을 수 없습니다.");
+}
+
+$row = $result->fetch_assoc();
 ?>
+
 
 <h3>수정하기</h3>
 <form action="../backend/update_process.php" method="post">
