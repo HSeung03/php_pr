@@ -25,12 +25,24 @@ $row = $result->fetch_assoc();
 ?>
 
 
-<h3>수정하기</h3>
-<form action="../backend/update_process.php" method="post">
+
+<h2>변경</h2>
+<form method="post" action="../backend/update_process.php">
     <input type="hidden" name="id" value="<?= $id ?>">
-    이름: <input type="text" name="name" value="<?= $row['name'] ?>"><br>
-    제목: <input type="text" name="subject" value="<?= $row['subject'] ?>"><br>
-    내용: <textarea name="content"><?= $row['content'] ?></textarea><br>
-    비밀번호: <input type="password" name="password"><br>
-    <input type="submit" value="수정">
+
+    <p>이름: <input type="text" name="name" value="<?= $row['name'] ?>"></p>
+    <p>제목: <input type="text" name="subject" value="<?= $row['subject'] ?>"></p>
+    <p>내용:<br>
+    <textarea name="content" rows="10" cols="50"><?= $row['content'] ?></textarea></p>
+
+    <!-- 수정 -->
+    <button type="submit">수정</button>
+
+    <!-- 삭제는 별도 form -->
+</form>
+
+<!-- 🔥 삭제 버튼은 별도 form으로 POST 전송 -->
+<form method="post" action="../backend/delete_process.php" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+    <input type="hidden" name="id" value="<?= $id ?>">
+    <button type="submit">삭제</button>
 </form>
