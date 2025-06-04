@@ -1,23 +1,23 @@
 <?php
-// ✅ DB 연결
+//DB 연결
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
 $conn->set_charset("utf8mb4");
 
-// ✅ 페이지당 게시물 수
+#페이지에 들어갈 수 있는 게시물 수
 $perpage = 5;
 
-// ✅ 현재 페이지
+//현재 페이지
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 
-// ✅ OFFSET 계산
+//OFFSET 계산
 $start = ($page - 1) * $perpage;
 
-// ✅ 게시물 목록 조회
+//게시물 목록 조회
 $sql = "SELECT * FROM board ORDER BY id DESC LIMIT $perpage OFFSET $start";
 $result = $conn->query($sql);
 
-// ✅ 전체 게시물 수 조회
+//전체 게시물 수 조회
 $total_sql = "SELECT COUNT(*) AS total FROM board";
 $total_result = $conn->query($total_sql);
 $total_row = $total_result->fetch_assoc();
