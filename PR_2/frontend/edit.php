@@ -1,12 +1,12 @@
 <?php
 // DB 연결
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
-if ($conn->connect_error) {
-    die("DB 연결 실패: " . $conn->connect_error);
+if ($conn->connect_error) { 
+    die("DB 연결 실패: " . $conn->connect_error); #연결 실패시 해당 메세지 출력하고 종료  
 }
 $conn->set_charset("utf8mb4");
 
-// id 가져오기
+// get 방식으로 전달된 id 값을 가져옴 , 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id === 0) {
@@ -18,7 +18,7 @@ $sql = "SELECT * FROM board WHERE id = $id";
 $result = $conn->query($sql);
 
 if (!$result || $result->num_rows === 0) {
-    die("게시글을 찾을 수 없습니다.");
+    die("게시글이 없습니다.");
 }
 
 $row = $result->fetch_assoc();
@@ -41,8 +41,8 @@ $row = $result->fetch_assoc();
     <!-- 삭제는 별도 form -->
 </form>
 
-<!-- 🔥 삭제 버튼은 별도 form으로 POST 전송 -->
-<form method="post" action="../backend/delete_process.php" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+<!-- 삭제 버튼은 별도 form으로 POST 전송 -->
+<form method="post" action="../backend/delete_process.php">
     <input type="hidden" name="id" value="<?= $id ?>">
     <button type="submit">삭제</button>
 </form>
