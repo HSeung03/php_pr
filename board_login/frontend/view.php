@@ -1,25 +1,25 @@
 <?php
-// ✅ DB 직접 연결
+
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
 $conn->set_charset("utf8mb4");
 
-// 🔍 GET으로 전달된 id 확인
+
 $id = $_GET['id'] ?? '';
 
-// ⚠️ id 없으면 에러 출력
+
 if (!$id) {
     echo "❗ ID가 지정되어 있지 않습니다.";
     exit;
 }
 
-// 🔍 게시글 조회
+
 $sql = "SELECT * FROM board WHERE id = $id";
 $result = $conn->query($sql);
 
 if ($result && $result->num_rows > 0) {
     $row = $result->fetch_assoc();
 } else {
-    echo "❗ 포스트를 찾을 수 없습니다.";
+    echo "포스트를 찾을 수 없습니다.";
     exit;
 }
 ?>
