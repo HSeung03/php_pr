@@ -10,8 +10,11 @@ if ($id === 0) {
     die("잘못된 접근입니다."); 
 }
 
-$sql = "SELECT * FROM board WHERE id = $id"; 
-$result = $conn->query($sql);
+$sql = "SELECT * FROM board WHERE id = ?"; 
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result(); 
 
 if (!$result || $result->num_rows === 0) { 
     die("게시글이 없습니다.");
