@@ -11,9 +11,8 @@ $conn->set_charset("utf8mb4");
 #POST 데이터 수신
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 $password = $_POST['password'] ?? '';
-$mode = $_POST['mode'] ?? '';
 
-if ($id === 0 || $password === '' || $mode === '') {
+if ($id === 0 || $password === '') {
     die("잘못된 접근입니다.");
 }
 

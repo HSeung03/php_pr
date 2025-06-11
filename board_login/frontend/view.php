@@ -8,7 +8,7 @@ $id = $_GET['id'] ?? '';
 
 
 if (!$id) {
-    echo "❗ ID가 지정되어 있지 않습니다.";
+    echo "ID가 지정되어 있지 않습니다.";
     exit;
 }
 
@@ -43,7 +43,6 @@ if ($result && $result->num_rows > 0) {
             <td>
                 <form action="password_check.php" method="post">
                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                    <input type="hidden" name="mode" value="edit"> <!-- 또는 delete -->
                     <button type="submit">변경</button>
                 </form>
             </td>
