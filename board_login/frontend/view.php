@@ -12,9 +12,11 @@ if (!$id) {
     exit;
 }
 
-
-$sql = "SELECT * FROM board WHERE id = $id";
-$result = $conn->query($sql);
+$sql = "SELECT * FROM board WHERE id = ?"; 
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $conn->get_result(); 
 
 if ($result && $result->num_rows > 0) {
     $row = $result->fetch_assoc();
