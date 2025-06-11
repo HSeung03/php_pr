@@ -7,7 +7,7 @@ $perpage = 5;
 #페이지에 들어갈 수 있는 게시물 수
 
 #현재 페이지
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = (int)($_GET['page'] ?? 1);
 #사용자가 ?page=...을 URL에 넣었는지 확인 없다면 기본값은 1 
 if ($page < 1) $page = 1; 
 #음수거나 0일경우 1로 보정
