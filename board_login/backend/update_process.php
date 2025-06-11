@@ -18,7 +18,8 @@ if ($id === 0 || $name === '' || $subject === '' || $content === '') {
     die("모든 항목을 입력해야 합니다.");
 }
 
-#특정 id값의 데이터를 업데이트 하는 sql문 
+#Get받은 ID(WHERE조건)의 데이터를 UPDATE
+#Set - 해당 변수들을 플레이스홀더의 값으로 SET(수정)
 $sql = "UPDATE board SET name = ?, subject = ?, content = ? WHERE id = ?";
 $stmt = $conn->prepare($sql); 
 $stmt->bind_param("sssi", $name, $subject, $content, $id);
