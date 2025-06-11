@@ -8,20 +8,21 @@ if ($conn->connect_error) {
 
 $conn->set_charset("utf8mb4");
 
-#폼에서 전송된 데이터 받기
+#있으면 대입 없으면 빈칸 처리 
 $name = $_POST['name'] ?? '';
 $password = $_POST['password'] ?? '';
 $subject = $_POST['subject'] ?? '';
 $content = $_POST['content'] ?? '';
 
-# 유효성 검사
+#빈칸일 경우 코드 종료
 if ($name === '' || $password === '' || $subject === '' || $content === '') {
     die("모든 항목을 입력해주세요.");
 }
 
-#INSERT 처리
+#새로운 행 value는 입력한 값이 실제로 채워지는 공간
 $sql = "INSERT INTO board (name, password, subject, content) VALUES (?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
+#bind = 연결 - 자료형까지 지정 
 $stmt->bind_param("ssss", $name, $password, $subject, $content);
 
 if ($stmt->execute()) {
