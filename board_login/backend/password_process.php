@@ -9,7 +9,7 @@ if ($conn->connect_error) {
 $conn->set_charset("utf8mb4");
 
 #POST 데이터 수신
-$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+$id = (int)($_POST['id'] ?? 0);
 $password = $_POST['password'] ?? '';
 
 if ($id === 0 || $password === '') {
