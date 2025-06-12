@@ -24,13 +24,13 @@ services:
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
+      TZ: Asia/Seoul                   
     ports:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
       - ./create_board.sql:/docker-entrypoint-initdb.d/init.sql
+      - /etc/localtime:/etc/localtime:ro  
 
 volumes:
   db-data:
-
-

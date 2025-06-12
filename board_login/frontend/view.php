@@ -1,5 +1,4 @@
 <?php
-
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
 $conn->set_charset("utf8mb4");
 
@@ -16,7 +15,9 @@ $sql = "SELECT * FROM board WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
-$result = $conn->get_result(); 
+
+
+$result = $stmt->get_result(); 
 
 if ($result && $result->num_rows > 0) {
     $row = $result->fetch_assoc();
