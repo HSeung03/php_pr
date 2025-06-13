@@ -16,8 +16,9 @@ if ($id === 0 || $password === '') {
     die("잘못된 접근입니다.");
 }
 
-#DB에서 비밀번호 조회
+#해당 id의 비밀번호를 데이터베이스로 부터 불러옴  
 $stmt = $conn->prepare("SELECT password FROM board WHERE id = ?");
+#보안성을 위해 정수로 연결 
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();

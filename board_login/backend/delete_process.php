@@ -16,7 +16,6 @@ $stmt = $conn->prepare("DELETE FROM board WHERE id = ?");
 $stmt->bind_param("i", $id);
 
 if ($stmt->execute()) {
-    #삭제 성공 시 바로 index.php로 
     header("Location: ../frontend/index.php");
     exit(); 
 } else {
