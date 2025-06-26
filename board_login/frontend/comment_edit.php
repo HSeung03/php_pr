@@ -45,9 +45,10 @@ function nl2br_custom($str) {
     <h1>댓글 수정</h1>
     <form action="../backend/comment_update_process.php" method="post">
         <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
-        <input type="hidden" name="post_id" value="<?= $post_id ?>"> <p>작성자: <input type="text" name="author" value="<?= $comment['author'] ?>" required></p>
-        <p>비밀번호: <input type="password" name="password" placeholder="비밀번호 재확인" required></p>
-        <p>내용:<br><textarea name="content" rows="10" cols="50" required><?= $comment['content'] ?></textarea></p>
+        <input type="hidden" name="post_id" value="<?= $post_id ?>">
+        <p>작성자: <input type="text" name="author" value="<?= $comment['author'] ?>"></p>
+        <p>비밀번호: <input type="password" name="password" placeholder="비밀번호 재확인"></p>
+        <p>내용:<br><textarea name="content" rows="10" cols="50"><?= $comment['content'] ?></textarea></p>
         <p>
             <button type="submit">수정 완료</button>
             <button type="button" onclick="location.href='view.php?id=<?= $post_id ?>'">취소</button>

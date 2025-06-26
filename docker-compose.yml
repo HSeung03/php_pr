@@ -15,22 +15,26 @@ services:
   php:
     build: ./php
     container_name: php
+    environment:
+      TZ: Asia/Seoul
     volumes:
       - ./board_login/backend:/var/www/html/backend
       - ./board_login/frontend:/var/www/html/frontend
+      - /etc/localtime:/etc/localtime:ro
 
   mysql:
     image: mysql:8.0
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
-      TZ: Asia/Seoul                   
+      TZ: Asia/Seoul
     ports:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
-      - ./create_board.sql:/docker-entrypoint-initdb.d/init.sql
-      - /etc/localtime:/etc/localtime:ro  
+      # 이 부분을 수정합니다: create_board.sql 파일을 디렉토리 안에 마운트
+      - ./create_board.sql:/docker-entrypoint-initdb.d/create_board.sql
+      - /etc/localtime:/etc/localtime:ro
 
 volumes:
   db-data:
