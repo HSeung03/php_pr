@@ -1,56 +1,49 @@
 <?php
-// 데이터베이스 연결
+// DB 연결
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
 $conn->set_charset("utf8mb4");
 
 if ($conn->connect_error) {
-    header("Location: ../frontend/index.php?error=db_connection_failed");
-    exit;
+    exit("DB 연결 실패");
 }
 
-// 액션 분기
+// 요청 액션 분기
 $action = $_REQUEST['action'] ?? '';
 
 switch ($action) {
-    case 'get':
-        header("Location: ../frontend/index.php?error=unsupported_get_action");
-        break;
-
     case 'add':
+        // 전달받은 데이터 정리
         $board_id = $_POST['board_id'] ?? '';
         $parent_id = $_POST['parent_id'] ?? null;
         $author = $_POST['author'] ?? '';
         $password = $_POST['password'] ?? '';
         $content = $_POST['content'] ?? '';
 
-        // 빈 문자열일 경우 null 처리
+        // 빈 문자열이면 null 처리
         $parent_id = ($parent_id === '' || $parent_id === null) ? null : (int)$parent_id;
 
+        // 필수 값 확인
         if (empty($board_id) || empty($author) || empty($password) || empty($content)) {
-            header("Location: ../frontend/view.php?id=" . $board_id . "&error=missing_info");
-            exit;
+            exit("필수 항목 누락");
         }
 
+        // 댓글 삽입 쿼리
         $sql = "INSERT INTO comments (board_id, parent_id, author, password, content) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-
-        // bind_param에서 null 허용을 위해 iisss로 처리하되, null은 set_null()처럼 따로 안 해도 됨
         $stmt->bind_param("iisss", $board_id, $parent_id, $author, $password, $content);
 
+        // 실행
         if ($stmt->execute()) {
-            header("Location: ../frontend/view.php?id=" . $board_id . "&status=comment_added");
-            exit;
+            exit("댓글 등록 완료");
         } else {
-            header("Location: ../frontend/view.php?id=" . $board_id . "&error=add_failed");
-            exit;
+            exit("댓글 등록 실패");
         }
 
         $stmt->close();
         break;
 
     default:
-        header("Location: ../frontend/index.php?error=unknown_action");
-        break;
+        exit("지원하지 않는 요청");
 }
 
 $conn->close();
