@@ -90,21 +90,21 @@ function nl2br_custom($str) {
 <body>
     <h1>게시판 &gt; 상세보기</h1>
 
-    <h2><?= htmlspecialchars($row['subject']) ?></h2>
-    <p>작성자: <?= htmlspecialchars($row['name']) ?></p>
+    <h2><?= $row['subject'] ?></h2>
+    <p>작성자: <?= $row['name'] ?></p>
     <p>
-        작성일: <?= htmlspecialchars($row['regdate']) ?>
+        작성일: <?= $row['regdate'] ?>
         <?php
         // 게시글에 'updated_at' 컬럼이 존재하고, 등록일과 수정일이 다를 경우에만 수정일을 표시
         if (isset($row['updated_at']) && $row['updated_at'] != $row['regdate']):
         ?>
-            <br>수정일: <?= htmlspecialchars($row['updated_at']) ?>
+            <br>수정일: <?= $row['updated_at'] ?>
         <?php endif; ?>
     </p>
-    <p><?= nl2br_custom(htmlspecialchars($row['content'])) ?></p>
+    <p><?= nl2br_custom($row['content']) ?></p>
 
     <form action="comment_password_check.php" method="post">
-        <input type="hidden" name="id" value="<?= htmlspecialchars($row['id']) ?>">
+        <input type="hidden" name="id" value="<?= $row['id'] ?>">
         <input type="hidden" name="type" value="post_change">
         <button type="submit">게시글 변경</button>
     </form>
@@ -114,7 +114,7 @@ function nl2br_custom($str) {
             <?php
             // 답글을 달 댓글의 작성자 이름을 가져오기, 해당 ID의 댓글이 없으면 '알 수 없음'으로 표시
             $reply_author = $comments_raw[$reply_to]['author'] ?? '알 수 없음';
-            echo '"' . htmlspecialchars($reply_author) . '" 님에게 답글 작성 중';
+            echo '"' . $reply_author . '" 님에게 답글 작성 중';
             ?>
         <?php else: // 새 댓글 작성 중이라면 ?>
             새 댓글 작성
@@ -123,15 +123,15 @@ function nl2br_custom($str) {
 
     <form action="../backend/comments_api.php" method="post">
         <input type="hidden" name="action" value="add">
-        <input type="hidden" name="board_id" value="<?= htmlspecialchars($row['id']) ?>">
-        <input type="hidden" name="parent_id" value="<?= htmlspecialchars($reply_to) ?>">
+        <input type="hidden" name="board_id" value="<?= $row['id'] ?>">
+        <input type="hidden" name="parent_id" value="<?= $reply_to ?>">
         <p>
             작성자: <input type="text" name="author" required> 비밀번호: <input type="password" name="password" required> </p>
         <p>
             <textarea name="content" placeholder="댓글 내용을 입력하세요." required></textarea> </p>
         <p>
             <button type="submit">댓글 등록</button> <?php if ($reply_to): // 답글 작성 중이라면 '취소' 버튼을 표시 ?>
-                <button type="button" onclick="location.href='view.php?id=<?= htmlspecialchars($row['id']) ?>'">취소</button>
+                <button type="button" onclick="location.href='view.php?id=<?= $row['id'] ?>'">취소</button>
             <?php endif; ?>
         </p>
     </form>
@@ -145,26 +145,26 @@ function nl2br_custom($str) {
     function render_comment_recursive($comment, $current_post_id, $depth = 0, $reply_to_id = null) {
         ?>
         <div>
-            <p><small>작성자: <?= htmlspecialchars($comment['author']) ?></small></p>
-            <p><?= nl2br_custom(htmlspecialchars($comment['content'])) ?></p>
+            <p><small>작성자: <?= $comment['author'] ?></small></p>
+            <p><?= nl2br_custom($comment['content']) ?></p>
 
             <div>
                 <small>
-                    작성일: <?= htmlspecialchars($comment['regdate']) ?>
+                    작성일: <?= $comment['regdate'] ?>
                     <?php
                     if (isset($comment['updated_at']) && $comment['regdate'] != $comment['updated_at']):
                     ?>
                         (수정됨)
                     <?php endif; ?>
                     <form action="comment_password_check.php" method="post">
-                        <input type="hidden" name="id" value="<?= htmlspecialchars($comment['id']) ?>">
+                        <input type="hidden" name="id" value="<?= $comment['id'] ?>">
                         <input type="hidden" name="type" value="comment_change">
-                        <input type="hidden" name="post_id" value="<?= htmlspecialchars($current_post_id) ?>">
+                        <input type="hidden" name="post_id" value="<?= $current_post_id ?>">
                         <button type="submit">변경</button> </form>
                     <?php if ($depth === 0): // 최상위 댓글에만 '답글' 버튼을 표시합니다. (대댓글에는 답글 버튼이 없음) ?>
                         <form action="view.php" method="get">
-                            <input type="hidden" name="id" value="<?= htmlspecialchars($current_post_id) ?>">
-                            <input type="hidden" name="reply_to" value="<?= htmlspecialchars($comment['id']) ?>">
+                            <input type="hidden" name="id" value="<?= $current_post_id ?>">
+                            <input type="hidden" name="reply_to" value="<?= $comment['id'] ?>">
                             <button type="submit">답글</button> </form>
                     <?php endif; ?>
                 </small>
