@@ -95,7 +95,6 @@ function nl2br_custom($str) {
 
 
 <form action="../backend/comments_api.php" method="post">
-    <input type="hidden" name="action" value="add">
     <input type="hidden" name="board_id" value="<?= $row['id'] ?>">
     <input type="hidden" name="parent_id" value="<?= $reply_to ?>">
     <p>작성자: <input type="text" name="author" required> 비밀번호: <input type="password" name="password" required></p>
