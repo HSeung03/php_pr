@@ -122,12 +122,8 @@ function render_comment_recursive($comment, $current_post_id, $depth = 0) {
     # 댓글 내용 표시 (들여쓰기 및 개행 문자 변환 적용)
     echo "<p>{$indent}" . nl2br_custom($comment['content']) . "</p>";
 
-    # 댓글 정보 및 버튼 컨테이너 시작
+
     echo "<div><small>{$indent}작성일: {$comment['regdate']}";
-    # 수정일이 있고 작성일과 다르면 "(수정됨)" 표시
-    if (isset($comment['updated_at']) && $comment['regdate'] != $comment['updated_at']) {
-        echo " (수정됨)";
-    }
 
     # 댓글 변경 폼 시작
     echo "<form action='comment_password_check.php' method='post'>";
