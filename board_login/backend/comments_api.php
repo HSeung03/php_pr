@@ -32,13 +32,16 @@ switch ($action) {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iisss", $board_id, $parent_id, $author, $password, $content);
 
-        // 실행
+        // 실행 및 리디렉션
         if ($stmt->execute()) {
-            exit("댓글 등록 완료");
+            // 등록 성공 시 view.php로 이동
+            header("Location: ../frontend/view.php?id=" . $board_id);
+            exit;
         } else {
             exit("댓글 등록 실패");
         }
 
+        // 자원 해제
         $stmt->close();
         break;
 
