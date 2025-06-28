@@ -7,47 +7,34 @@ if ($conn->connect_error) {
     exit("DB 연결 실패");
 }
 
-// 요청 액션 분기
-$action = $_REQUEST['action'] ?? '';
+// 전달받은 데이터 정리
+$board_id = $_POST['board_id'] ?? '';
+$parent_id = $_POST['parent_id'] ?? null;
+$author = $_POST['author'] ?? '';
+$password = $_POST['password'] ?? '';
+$content = $_POST['content'] ?? '';
 
-switch ($action) {
-    case 'add':
-        // 전달받은 데이터 정리
-        $board_id = $_POST['board_id'] ?? '';
-        $parent_id = $_POST['parent_id'] ?? null;
-        $author = $_POST['author'] ?? '';
-        $password = $_POST['password'] ?? '';
-        $content = $_POST['content'] ?? '';
+// 빈 문자열이면 null 처리
+$parent_id = ($parent_id === '' || $parent_id === null) ? null : (int)$parent_id;
 
-        // 빈 문자열이면 null 처리
-        $parent_id = ($parent_id === '' || $parent_id === null) ? null : (int)$parent_id;
-
-        // 필수 값 확인
-        if (empty($board_id) || empty($author) || empty($password) || empty($content)) {
-            exit("필수 항목 누락");
-        }
-
-        // 댓글 삽입 쿼리
-        $sql = "INSERT INTO comments (board_id, parent_id, author, password, content) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iisss", $board_id, $parent_id, $author, $password, $content);
-
-        // 실행 및 리디렉션
-        if ($stmt->execute()) {
-            // 등록 성공 시 view.php로 이동
-            header("Location: ../frontend/view.php?id=" . $board_id);
-            exit;
-        } else {
-            exit("댓글 등록 실패");
-        }
-
-        // 자원 해제
-        $stmt->close();
-        break;
-
-    default:
-        exit("지원하지 않는 요청");
+// 필수 값 확인
+if (empty($board_id) || empty($author) || empty($password) || empty($content)) {
+    exit("필수 항목 누락");
 }
 
+// 댓글 삽입 쿼리
+$sql = "INSERT INTO comments (board_id, parent_id, author, password, content) VALUES (?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("iisss", $board_id, $parent_id, $author, $password, $content);
+
+// 실행 및 리디렉션
+if ($stmt->execute()) {
+    header("Location: ../frontend/view.php?id=" . $board_id);
+    exit;
+} else {
+    exit("댓글 등록 실패");
+}
+
+$stmt->close();
 $conn->close();
 ?>

@@ -1,62 +1,97 @@
 <?php
+# 데이터베이스 연결 설정
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
+# 연결 오류 발생 시 스크립트 중단 및 오류 메시지 출력
 if ($conn->connect_error) die("DB 연결 실패: " . $conn->connect_error);
+# 데이터베이스 문자열 인코딩을 UTF-8로 설정
 $conn->set_charset("utf8mb4");
 
+# GET 요청에서 'id' 파라미터 값을 가져오고, 없으면 빈 문자열 할당
 $id = $_GET['id'] ?? '';
+# GET 요청에서 'reply_to' 파라미터 값을 가져오고, 없으면 null 할당
 $reply_to = $_GET['reply_to'] ?? null;
+# 'id'가 없으면 스크립트 중단 및 메시지 출력
 if (!$id) exit("ID가 지정되어 있지 않습니다.");
 
+# 게시글 정보를 가져오는 SQL 쿼리 준비
 $sql = "SELECT * FROM board WHERE id = ?";
+# SQL 쿼리 실행을 위한 prepared statement 생성
 $stmt = $conn->prepare($sql);
+# 'id' 값을 정수형으로 바인딩
 $stmt->bind_param("i", $id);
+# prepared statement 실행
 $stmt->execute();
+# 쿼리 결과 가져오기
 $result = $stmt->get_result();
+# 결과가 없거나 게시글을 찾을 수 없으면 스크립트 중단 및 메시지 출력
 if (!$result || $result->num_rows < 1) exit("포스트를 찾을 수 없습니다.");
+# 결과 행을 연관 배열로 가져오기
 $row = $result->fetch_assoc();
 
+# 댓글 데이터를 저장할 빈 배열 초기화
 $comments_raw = [];
+# 댓글 정보를 등록일 기준으로 오름차순으로 가져오는 SQL 쿼리 준비
 $comments_sql = "SELECT * FROM comments WHERE board_id = ? ORDER BY regdate ASC";
+# 댓글 쿼리 실행을 위한 prepared statement 생성
 $comments_stmt = $conn->prepare($comments_sql);
+# 'board_id' 값을 정수형으로 바인딩
 $comments_stmt->bind_param("i", $id);
+# prepared statement 실행
 $comments_stmt->execute();
+# 쿼리 결과 가져오기
 $comments_result = $comments_stmt->get_result();
 
+# 모든 댓글 데이터를 순회하며 'comments_raw' 배열에 저장
 while ($c = $comments_result->fetch_assoc()) {
+    # 'parent_id'가 설정되어 있지 않으면 null로 초기화
     if (!isset($c['parent_id'])) $c['parent_id'] = null;
+    # 댓글 ID를 키로 사용하여 댓글 데이터 저장
     $comments_raw[$c['id']] = $c;
 }
 
+# 댓글 prepared statement 닫기
 $comments_stmt->close();
+# 게시글 prepared statement 닫기
 $stmt->close();
+# 데이터베이스 연결 닫기
 $conn->close();
 
+# 댓글 트리를 저장할 빈 배열 초기화
 $tree = [];
+# 각 댓글을 순회하며 자식 댓글을 연결
 foreach ($comments_raw as $cid => &$c) {
+    # 각 댓글에 'children' 배열 초기화
     $c['children'] = [];
+    # 'parent_id'가 있고 부모 댓글이 'comments_raw'에 존재하면 자식으로 추가
     if (!empty($c['parent_id']) && isset($comments_raw[$c['parent_id']])) {
         $comments_raw[$c['parent_id']]['children'][] = &$c;
     } else {
+        # 부모가 없으면 최상위 댓글로 'tree' 배열에 추가
         $tree[] = &$c;
     }
 }
+# 참조 해제 (메모리 누수 방지)
 unset($c);
 
+# 최상위 댓글들을 등록일 기준으로 정렬
 usort($tree, function($a, $b) {
     return strtotime($a['regdate']) - strtotime($b['regdate']);
 });
 
+# 개행 문자를 HTML `<br>` 태그로 변환하는 함수
 function nl2br_custom($str) {
     return str_replace(["\r\n", "\r", "\n"], "<br>", $str);
 }
 ?>
+
 
 <h1>게시판 > 상세보기</h1>
 <h2><?= $row['subject'] ?></h2>
 <p>작성자: <?= $row['name'] ?></p>
 <p>
     작성일: <?= $row['regdate'] ?>
-    <?php if (isset($row['updated_at']) && $row['updated_at'] != $row['regdate']): ?>
+    <?php # 수정일이 있고 작성일과 다르면 수정일 표시
+    if (isset($row['updated_at']) && $row['updated_at'] != $row['regdate']): ?>
         <br>수정일: <?= $row['updated_at'] ?>
     <?php endif; ?>
 </p>
@@ -70,14 +105,17 @@ function nl2br_custom($str) {
 
 <h3>댓글</h3>
 <h4>
-    <?php if ($reply_to): ?>
-        <?php $reply_author = $comments_raw[$reply_to]['author'] ?? '알 수 없음'; ?>
-        
+    <?php # 답글 작성 중인 경우
+    if ($reply_to): ?>
+        <?php # 답글 대상 작성자 이름 가져오기
+        $reply_author = $comments_raw[$reply_to]['author'] ?? '알 수 없음'; ?>
         "<?= $reply_author ?>" 님에게 답글 작성 중
-    <?php else: ?>
+    <?php # 새 댓글 작성 중인 경우
+    else: ?>
         새 댓글 작성
     <?php endif; ?>
 </h4>
+
 
 <form action="../backend/comments_api.php" method="post">
     <input type="hidden" name="action" value="add">
@@ -87,55 +125,77 @@ function nl2br_custom($str) {
     <p><textarea name="content" required></textarea></p>
     <p>
         <button type="submit">댓글 등록</button>
-        <?php if ($reply_to): ?>
+        <?php # 답글 작성 중인 경우 취소 버튼 표시
+        if ($reply_to): ?>
             <button type="button" onclick="location.href='view.php?id=<?= $row['id'] ?>'">취소</button>
         <?php endif; ?>
     </p>
 </form>
 
 <?php
+# 재귀적으로 댓글을 렌더링하는 함수
 function render_comment_recursive($comment, $current_post_id, $depth = 0) {
-    $indent = str_repeat("&nbsp;", $depth * 4);  // 들여쓰기 (4칸 = 약 1탭)
+    # 들여쓰기 공백 문자열 생성 (깊이에 따라)
+    $indent = str_repeat("&nbsp;", $depth * 4);
 
+    # 댓글 컨테이너 시작
     echo "<div>";
+    # 작성자 정보 표시 (들여쓰기 적용)
     echo "<p><small>{$indent}작성자: {$comment['author']}</small></p>";
+    # 댓글 내용 표시 (들여쓰기 및 개행 문자 변환 적용)
     echo "<p>{$indent}" . nl2br_custom($comment['content']) . "</p>";
 
+    # 댓글 정보 및 버튼 컨테이너 시작
     echo "<div><small>{$indent}작성일: {$comment['regdate']}";
+    # 수정일이 있고 작성일과 다르면 "(수정됨)" 표시
     if (isset($comment['updated_at']) && $comment['regdate'] != $comment['updated_at']) {
         echo " (수정됨)";
     }
 
-    // 댓글 변경 버튼
+    # 댓글 변경 폼 시작
     echo "<form action='comment_password_check.php' method='post'>";
+    # 댓글 ID를 숨겨진 필드로 전달
     echo "<input type='hidden' name='id' value='{$comment['id']}'>";
+    # 요청 타입을 'comment_change'로 설정
     echo "<input type='hidden' name='type' value='comment_change'>";
+    # 현재 게시글 ID를 숨겨진 필드로 전달
     echo "<input type='hidden' name='post_id' value='{$current_post_id}'>";
+    # 댓글 변경 버튼 (들여쓰기 적용)
     echo "{$indent}<button type='submit'>변경</button>";
     echo "</form>";
 
-    // 답글 버튼 (최상위 댓글만)
+    # 답글 버튼 (최상위 댓글만)
     if ($depth === 0) {
+        # 답글 폼 시작
         echo "<form action='view.php' method='get'>";
+        # 현재 게시글 ID를 숨겨진 필드로 전달
         echo "<input type='hidden' name='id' value='{$current_post_id}'>";
+        # 답글 대상 댓글 ID를 숨겨진 필드로 전달
         echo "<input type='hidden' name='reply_to' value='{$comment['id']}'>";
+        # 답글 버튼 (들여쓰기 적용)
         echo "{$indent}<button type='submit'>답글</button>";
         echo "</form>";
     }
 
+    # 댓글 정보 및 버튼 컨테이너 끝
     echo "</small></div>";
+    # 댓글 컨테이너 끝
     echo "</div>";
 
+    # 현재 댓글의 자식 댓글들을 재귀적으로 렌더링
     foreach ($comment['children'] as $child) {
         render_comment_recursive($child, $current_post_id, $depth + 1);
     }
 }
 
+# 댓글 트리가 비어있지 않으면 댓글 렌더링 시작
 if (!empty($tree)) {
+    # 최상위 댓글들을 순회하며 재귀 함수 호출
     foreach ($tree as $comment) {
         render_comment_recursive($comment, $id);
     }
 } else {
+    # 댓글이 없으면 메시지 출력
     echo "<p>아직 댓글이 없습니다.</p>";
 }
 ?>
