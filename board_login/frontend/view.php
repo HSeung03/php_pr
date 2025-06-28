@@ -1,84 +1,67 @@
 <?php
-# 데이터베이스 연결 설정
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
-# 연결 오류 발생 시 스크립트 중단 및 오류 메시지 출력
 if ($conn->connect_error) die("DB 연결 실패: " . $conn->connect_error);
-# 데이터베이스 문자열 인코딩을 UTF-8로 설정
 $conn->set_charset("utf8mb4");
 
-# GET 요청에서 'id' 파라미터 값을 가져오고, 없으면 빈 문자열 할당
 $id = $_GET['id'] ?? '';
-# GET 요청에서 'reply_to' 파라미터 값을 가져오고, 없으면 null 할당
 $reply_to = $_GET['reply_to'] ?? null;
-# 'id'가 없으면 스크립트 중단 및 메시지 출력
 if (!$id) exit("ID가 지정되어 있지 않습니다.");
 
-# 게시글 정보를 가져오는 SQL 쿼리 준비
 $sql = "SELECT * FROM board WHERE id = ?";
-# SQL 쿼리 실행을 위한 prepared statement 생성
+# SQL 쿼리 실행을 위한 prepared statement 생성 , 바인딩
 $stmt = $conn->prepare($sql);
-# 'id' 값을 정수형으로 바인딩
 $stmt->bind_param("i", $id);
-# prepared statement 실행
 $stmt->execute();
 # 쿼리 결과 가져오기
 $result = $stmt->get_result();
-# 결과가 없거나 게시글을 찾을 수 없으면 스크립트 중단 및 메시지 출력
 if (!$result || $result->num_rows < 1) exit("포스트를 찾을 수 없습니다.");
 # 결과 행을 연관 배열로 가져오기
 $row = $result->fetch_assoc();
 
-# 댓글 데이터를 저장할 빈 배열 초기화
+# 댓글 데이터가 들어갈 배열 초기화
 $comments_raw = [];
-# 댓글 정보를 등록일 기준으로 오름차순으로 가져오는 SQL 쿼리 준비
+# 오름차순으로 정렬
 $comments_sql = "SELECT * FROM comments WHERE board_id = ? ORDER BY regdate ASC";
-# 댓글 쿼리 실행을 위한 prepared statement 생성
 $comments_stmt = $conn->prepare($comments_sql);
-# 'board_id' 값을 정수형으로 바인딩
 $comments_stmt->bind_param("i", $id);
-# prepared statement 실행
 $comments_stmt->execute();
-# 쿼리 결과 가져오기
 $comments_result = $comments_stmt->get_result();
 
-# 모든 댓글 데이터를 순회하며 'comments_raw' 배열에 저장
+# 모든 댓글 데이터를 반복하면서 변수에 저장 
 while ($c = $comments_result->fetch_assoc()) {
-    # 'parent_id'가 설정되어 있지 않으면 null로 초기화
+    # 'parent_id'가 없으면 null로 반환
     if (!isset($c['parent_id'])) $c['parent_id'] = null;
-    # 댓글 ID를 키로 사용하여 댓글 데이터 저장
+    # ID로 댓글 저장 
     $comments_raw[$c['id']] = $c;
 }
 
-# 댓글 prepared statement 닫기
 $comments_stmt->close();
-# 게시글 prepared statement 닫기
 $stmt->close();
-# 데이터베이스 연결 닫기
 $conn->close();
 
-# 댓글 트리를 저장할 빈 배열 초기화
+#일반 댓글이 들어갈 배열 초기화
 $tree = [];
-# 각 댓글을 순회하며 자식 댓글을 연결
+# 각 댓글을 순회하면서 키와 값을 분리
 foreach ($comments_raw as $cid => &$c) {
-    # 각 댓글에 'children' 배열 초기화
+    #대댓글은 데이터베이스에 없어서 임의로 배열 설정 
     $c['children'] = [];
-    # 'parent_id'가 있고 부모 댓글이 'comments_raw'에 존재하면 자식으로 추가
+    # parent_id가 있을 경우 parent_id[childer]으로 참조 설정
     if (!empty($c['parent_id']) && isset($comments_raw[$c['parent_id']])) {
         $comments_raw[$c['parent_id']]['children'][] = &$c;
     } else {
-        # 부모가 없으면 최상위 댓글로 'tree' 배열에 추가
+        # parent_id가 없으면 tree에 저장 
         $tree[] = &$c;
     }
 }
-# 참조 해제 (메모리 누수 방지)
+# 메모리 누수 방지로 참조 해제
 unset($c);
 
-# 최상위 댓글들을 등록일 기준으로 정렬
+# 등록일이  빠른 순으로 정렬 날짜 - 날짜
 usort($tree, function($a, $b) {
     return strtotime($a['regdate']) - strtotime($b['regdate']);
 });
 
-# 개행 문자를 HTML `<br>` 태그로 변환하는 함수
+# 배열안의 문자를 <br>줄바꿈으로 반환 
 function nl2br_custom($str) {
     return str_replace(["\r\n", "\r", "\n"], "<br>", $str);
 }
@@ -88,13 +71,7 @@ function nl2br_custom($str) {
 <h1>게시판 > 상세보기</h1>
 <h2><?= $row['subject'] ?></h2>
 <p>작성자: <?= $row['name'] ?></p>
-<p>
-    작성일: <?= $row['regdate'] ?>
-    <?php # 수정일이 있고 작성일과 다르면 수정일 표시
-    if (isset($row['updated_at']) && $row['updated_at'] != $row['regdate']): ?>
-        <br>수정일: <?= $row['updated_at'] ?>
-    <?php endif; ?>
-</p>
+<p>작성일: <?= $row['regdate'] ?></p>
 <p><?= nl2br_custom($row['content']) ?></p>
 
 <form action="comment_password_check.php" method="post">
