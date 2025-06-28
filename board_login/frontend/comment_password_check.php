@@ -7,6 +7,7 @@ $type = $_POST['type'] ?? '';
 $post_id = $_POST['post_id'] ?? ''; 
 
 $message = '';
+$redirect_url = ''; // 🔹 추가된 초기화
 
 if (empty($id) || empty($type)) {
     header("Location: index.php?error=access_denied_missing_info");
@@ -16,10 +17,12 @@ if (empty($id) || empty($type)) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     $input_password = $_POST['password'];
 
+    // 🔹 작업 대상 정보 초기화
     $table = '';
     $id_column = '';
     $success_redirect_base = '';
 
+    // 🔹 타입에 따라 테이블 및 리다이렉트 경로 설정
     if ($type === 'post' || $type === 'post_change') {
         $table = 'board';
         $id_column = 'id';
@@ -33,12 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
         exit;
     }
 
+    // 🔹 DB에서 해당 ID의 비밀번호 조회
     $sql = "SELECT password FROM " . $table . " WHERE " . $id_column . " = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
 
+    // 🔹 결과가 있으면 비밀번호 확인
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $stored_password = $row['password'];
@@ -46,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
         if ($input_password === $stored_password) {
             $redirect_url = $success_redirect_base . "?id=" . $id;
 
+            // 댓글이면 post_id도 같이 넘김
             if (strpos($type, 'comment') !== false) {
                 $redirect_url .= "&post_id=" . $post_id;
             }
