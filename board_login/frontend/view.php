@@ -110,9 +110,9 @@ function nl2br_custom($str) {
 </form>
 
 <?php
-# 재귀적으로 댓글을 렌더링하는 함수
+# 댓글이 없을때 까지 반복하는 함수 
 function render_comment_recursive($comment, $current_post_id, $depth = 0) {
-    # 들여쓰기 공백 문자열 생성 (깊이에 따라)
+    # 들여쓰기 문자열
     $indent = str_repeat("&nbsp;", $depth * 4);
 
     # 댓글 컨테이너 시작
@@ -133,26 +133,19 @@ function render_comment_recursive($comment, $current_post_id, $depth = 0) {
     echo "<input type='hidden' name='type' value='comment_change'>";
     # 현재 게시글 ID를 숨겨진 필드로 전달
     echo "<input type='hidden' name='post_id' value='{$current_post_id}'>";
-    # 댓글 변경 버튼 (들여쓰기 적용)
     echo "{$indent}<button type='submit'>변경</button>";
     echo "</form>";
 
     # 답글 버튼 (최상위 댓글만)
     if ($depth === 0) {
-        # 답글 폼 시작
         echo "<form action='view.php' method='get'>";
-        # 현재 게시글 ID를 숨겨진 필드로 전달
         echo "<input type='hidden' name='id' value='{$current_post_id}'>";
-        # 답글 대상 댓글 ID를 숨겨진 필드로 전달
         echo "<input type='hidden' name='reply_to' value='{$comment['id']}'>";
-        # 답글 버튼 (들여쓰기 적용)
         echo "{$indent}<button type='submit'>답글</button>";
         echo "</form>";
     }
 
-    # 댓글 정보 및 버튼 컨테이너 끝
     echo "</small></div>";
-    # 댓글 컨테이너 끝
     echo "</div>";
 
     # 현재 댓글의 자식 댓글들을 재귀적으로 렌더링
@@ -161,9 +154,9 @@ function render_comment_recursive($comment, $current_post_id, $depth = 0) {
     }
 }
 
-# 댓글 트리가 비어있지 않으면 댓글 렌더링 시작
+# Tree가 있을경우에 함수 호출
 if (!empty($tree)) {
-    # 최상위 댓글들을 순회하며 재귀 함수 호출
+    # 일반댓글을 순회하면서 호출 
     foreach ($tree as $comment) {
         render_comment_recursive($comment, $id);
     }
