@@ -95,23 +95,36 @@ function nl2br_custom($str) {
 
 <?php
 function render_comment_recursive($comment, $current_post_id, $depth = 0) {
+    $indent = str_repeat("&nbsp;", $depth * 4);  // 들여쓰기 (4칸 = 약 1탭)
+
     echo "<div>";
-    echo "<p><small>작성자: {$comment['author']}</small></p>";
-    echo "<p>" . nl2br_custom($comment['content']) . "</p>";
-    echo "<div><small>작성일: {$comment['regdate']}";
-    if (isset($comment['updated_at']) && $comment['regdate'] != $comment['updated_at']) echo " (수정됨)";
+    echo "<p><small>{$indent}작성자: {$comment['author']}</small></p>";
+    echo "<p>{$indent}" . nl2br_custom($comment['content']) . "</p>";
+
+    echo "<div><small>{$indent}작성일: {$comment['regdate']}";
+    if (isset($comment['updated_at']) && $comment['regdate'] != $comment['updated_at']) {
+        echo " (수정됨)";
+    }
+
+    // 댓글 변경 버튼
     echo "<form action='comment_password_check.php' method='post'>";
     echo "<input type='hidden' name='id' value='{$comment['id']}'>";
     echo "<input type='hidden' name='type' value='comment_change'>";
     echo "<input type='hidden' name='post_id' value='{$current_post_id}'>";
-    echo "<button type='submit'>변경</button></form>";
+    echo "{$indent}<button type='submit'>변경</button>";
+    echo "</form>";
+
+    // 답글 버튼 (최상위 댓글만)
     if ($depth === 0) {
         echo "<form action='view.php' method='get'>";
         echo "<input type='hidden' name='id' value='{$current_post_id}'>";
         echo "<input type='hidden' name='reply_to' value='{$comment['id']}'>";
-        echo "<button type='submit'>답글</button></form>";
+        echo "{$indent}<button type='submit'>답글</button>";
+        echo "</form>";
     }
-    echo "</small></div></div>";
+
+    echo "</small></div>";
+    echo "</div>";
 
     foreach ($comment['children'] as $child) {
         render_comment_recursive($child, $current_post_id, $depth + 1);
