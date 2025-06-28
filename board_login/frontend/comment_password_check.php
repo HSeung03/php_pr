@@ -1,15 +1,12 @@
 <?php
-// 데이터베이스 연결
 $conn = new mysqli("mysql", "root", "12345678", "board_login");
 $conn->set_charset("utf8mb4");
 
-// POST로 전달된 값 가져오기
-$id = $_POST['id'] ?? ''; // 게시글 ID 또는 댓글 ID
-$type = $_POST['type'] ?? ''; // 'post', 'comment_edit', 'post_change', 'comment_change' (삭제 관련은 제거)
-$post_id = $_POST['post_id'] ?? ''; // 댓글의 경우, 해당 게시글 ID (게시글의 경우 비어있을 수 있음)
+$id = $_POST['id'] ?? ''; 
+$type = $_POST['type'] ?? ''; 
+$post_id = $_POST['post_id'] ?? ''; 
 
 $message = '';
-$redirect_url = '';
 
 if (empty($id) || empty($type)) {
     header("Location: index.php?error=access_denied_missing_info");
@@ -23,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     $id_column = '';
     $success_redirect_base = '';
 
-    // 게시글 또는 댓글 테이블 및 리다이렉트 경로 결정
     if ($type === 'post' || $type === 'post_change') {
         $table = 'board';
         $id_column = 'id';
